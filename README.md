@@ -3,7 +3,7 @@
 This is a command line tool(mix-task) to address the problem of fetching a newer
 version of a transitive dependency that causes compatibility issues.
 
-When you neex to manage your Elixir project with specific old versions of
+When you need to manage your Elixir project with specific old versions of
 dependencies while also ensuring compatibility with a specific point in time -
 for a specific historical versions.
 
@@ -75,6 +75,10 @@ cd fix_mix_lock
 
 MIX_ENV=prod mix archive.build
 mix archive.install ./fix_mix_lock-*.ez
+
+
+mix fix.lock --version
+# => mix.lock fixer v0.1.0
 ```
 
 Note:
@@ -86,7 +90,55 @@ this archive on different versions of the elixir in your environment.
 
 ## Usage example
 
-example for old phoenix 1.6 project exact mix.exs
+example for old phoenix 1.6 project with exact numbers of dependencies known
+only for direct dependencies:
+
+mix.exs
+```elixir
+defmodule HelloApp.MixProject do
+  use Mix.Project
+
+  def project do
+    [
+      app: :hello_app,
+      version: "0.1.0",
+      # ...
+    ]
+  end
+
+  def application do
+    # ...
+  end
+
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
+  defp deps do
+    [
+      {:phoenix, "1.6.2"},
+      {:phoenix_ecto, "4.4.0"},
+      {:ecto_sql, "3.7.1"},
+      {:postgrex, "0.15.13"},
+      {:phoenix_html, "3.2.0"},
+      {:phoenix_live_reload, "1.3.3", only: :dev},
+      {:phoenix_live_view, "0.17.10"},
+      {:floki, "0.32.1", only: :test},
+      {:phoenix_live_dashboard, "0.6.5"},
+      {:esbuild, "0.4.0", runtime: Mix.env() == :dev},
+      {:swoosh, "1.7.1"},
+      {:telemetry_metrics, "0.6.1"},
+      {:telemetry_poller, "1.0.0"},
+      {:gettext, "0.19.1"},
+      {:jason, "1.3.0"},
+      {:plug_cowboy, "2.5.2"},
+      #
+    ]
+  end
+
+  #...
+end
+```
 
 ```sh
 cd  path/to/your/phoenix_project
@@ -149,7 +201,7 @@ Code snippet for mix.exs with exact versions:
       {:ranch, "2.1.0"},
       {:telemetry, "1.1.0"},
 ```
-next just copy-and-paste generated code into `deps` in your `mix.exs` file
+then just copy-and-paste generated code into `deps` in your `mix.exs` file.
 
 Note:
 In this particular example, you will need to fix the version for the `:ranch`
@@ -197,6 +249,9 @@ Fetching releases of the 'plug' package...
 ```
 
 
+### An example of a mistake that can be eliminated using this utility
+
+- todo
 
 
 ## TODOList:
