@@ -6,4 +6,7 @@ build:
 	MIX_ENV=prod mix archive.build
 
 install:
-	mix archive.install ./fix_mix_lock-0.1.0.ez
+	mix archive.install ./fix_mix_lock-*.ez
+
+uninstall:
+	mix archive.uninstall fix_mix_lock

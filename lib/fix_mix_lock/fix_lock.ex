@@ -91,8 +91,14 @@ defmodule Mix.Tasks.Fix.Lock do
       !is_list(direct_deps) || length(direct_deps) < 1 ->
         Mix.shell().error("No dependencies found in mix.exs")
 
+      # todo case: all deps specified in mix.exs and this tool say
+      # "no transitive_deps" - this can be confused if the user has forgotten
+      # that he defined all his dependencies in mix.exs
+      # Since, according to the idea, you need to look for only versions of
+      # those packages that are indicated in mix.lock, but which are not in mix.exs
       !is_list(transitive_deps) || length(transitive_deps) < 1 ->
         Mix.shell().error("No transitive dependencies found in mix.lock")
+        Mix.shell().error("Or all your dependencies are already defined in mix.exs")
 
       true ->
         Mix.shell().info("\nFetching release dates of direct dependencies...")
@@ -106,6 +112,17 @@ defmodule Mix.Tasks.Fix.Lock do
 
         Mix.shell().info("\nCode snippet for mix.exs with exact versions:\n")
         Mix.shell().info(code_snippet)
+
+        Mix.shell().info("""
+
+
+        Next steps:
+
+            1. copy generated code into the deps block in your mix.exs file
+            2. mix deps.clean --all --unlock
+            3. mix deps.get
+            4. mix compile
+        """)
     end
   end
 
@@ -240,6 +257,7 @@ defmodule Mix.Tasks.Fix.Lock do
     case Regex.run(~r/\s+"[^"]+":\s+{:hex,\s+:([^"]+),\s+"([^"]+)",/, line) do
       # case Regex.run(~r/,\s+"(\d+\.\d+\.\d+)",/, line) do
       [_, name, version] ->
+        # IO.puts("[DEBUG] #{name}  #{version}")
         {name, version}
 
       _ ->

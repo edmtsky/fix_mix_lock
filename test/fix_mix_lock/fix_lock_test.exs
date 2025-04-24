@@ -35,7 +35,13 @@ defmodule FixMixLock.FixLockTest do
       """
 
       assert parse_mix_lock_line(line) == {"cowboy", "2.13.0"}
+
+      line = """
+        "cowboy": {:hex, :cowboy, "2.9.0", "865dd8b6607e14cf03282e10e934023a1bd8be6f6bacf921a7e2a96d800cd452", [:make, :rebar3], [{:cowlib, "2.11.0", [hex: :cowlib, repo: "hexpm", optional: false]}, {:ranch, "1.8.0", [hex: :ranch, repo: "hexpm", optional: false]}], "hexpm", "2c729f934b4e1aa149aff882f57c6372c15399a20d54f65c8d67bef583021bde"},
+      """
+      assert parse_mix_lock_line(line) == {"cowboy", "2.9.0"}
     end
+
 
     test "parse_mix_lock_file" do
       assert parse_mix_lock_file("test/samples/phx_1_6_2/mix.lock") == %{
