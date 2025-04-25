@@ -124,5 +124,4 @@ defmodule Mix.Tasks.Fix.Lock do
 
     fixed_deps_map
   end
-
 end

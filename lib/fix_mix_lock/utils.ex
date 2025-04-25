@@ -4,8 +4,16 @@ defmodule FixMixLock.Utils do
   """
   alias FixMixLock.HexPmApi
 
+  @spec fmt_date(DateTime.t()) :: String.t()
   def fmt_date(dt) do
-    "#{dt.year}/#{dt.month}/#{dt.day}"
+    "#{dt.year}-#{zero_pad(dt.month)}-#{zero_pad(dt.day)}"
+  end
+
+  @spec zero_pad(integer(), integer()) :: String
+  defp zero_pad(number, amount \\ 2) do
+    number
+    |> Integer.to_string()
+    |> String.rjust(amount, ?0)
   end
 
   @doc """

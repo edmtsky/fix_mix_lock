@@ -231,4 +231,8 @@ defmodule FixMixLock.UtilsTest do
              max_time: ~U[2021-08-15 06:59:42.471906Z]
            }
   end
+
+  test "fmt_date" do
+    assert fmt_date(~U[2025-04-25 11:40:53.986455Z]) == "2025-04-25"
+  end
 end

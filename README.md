@@ -40,6 +40,8 @@ of time for all other dependencies.
   (to fix the issue with broken versions of transitive dependencies)
 - get a list of all available versions and date of their releases for a
   particular package.
+- get point of time during which the dependencies used were relevant
+  (from the moment of their release to the appearance of the next newer version)
 
 
 ## Limitation
@@ -181,6 +183,17 @@ Fetching releases of the 'plug' package...
 1.13.6    2022-04-14 09:08:16.297297Z
 ...
 0.4.1    2014-04-23 18:58:54.000000Z
+```
+
+
+Show the points of time on which used dependencies (from mix.exs) were relevant:
+```sh
+mix deps.used
+
+phoenix                           1.6.2       2021-10-09 - 2021-12-08
+phoenix_ecto                      4.4.0       2021-08-18 - 2023-05-10
+ecto_sql                          3.7.1       2021-10-12 - 2022-01-23
+...
 ```
 
 
