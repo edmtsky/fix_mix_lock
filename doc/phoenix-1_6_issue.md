@@ -160,67 +160,52 @@ cd  path/to/your/phoenix_project
 
 mix lock.fix
 
-Fetching release dates of direct dependencies...
-  - phoenix  1.6.2
-  - phoenix_ecto  4.4.0
-  - ecto_sql  3.7.1
-  - postgrex  0.15.13
-  - phoenix_html  3.2.0
-  - phoenix_live_reload  1.3.3
-  - phoenix_live_view  0.17.10
-  - floki  0.32.1
-  - phoenix_live_dashboard  0.6.5
-  - esbuild  0.4.0
-  - swoosh  1.7.1
-  - telemetry_metrics  0.6.1
-  - telemetry_poller  1.0.0
-  - gettext  0.19.1
-  - jason  1.3.0
-  - plug_cowboy  2.5.2
+Determine point of time by phoenix 1.6.2 ...
+Point of time: 2021/10/9 - 2021/12/8
 
 Fetching release dates of transitive dependencies...
-  - plug  (locked: 1.17.0)
-  - connection  (locked: 1.1.0)
-  - ranch  (locked: 2.2.0)
-  - phoenix_pubsub  (locked: 2.1.3)
-  - decimal  (locked: 2.3.0)
-  - cowboy  (locked: 2.13.0)
-  - plug_crypto  (locked: 1.2.5)
-  - db_connection  (locked: 2.7.0)
-  - mime  (locked: 2.0.6)
-  - ecto  (locked: 3.7.2)
-  - phoenix_view  (locked: 1.1.2)
-  - telemetry  (locked: 1.3.0)
-  - cowlib  (locked: 2.15.0)
-  - castore  (locked: 1.0.12)
   - html_entities  (locked: 0.5.2)
+  - connection  (locked: 1.1.0)
+  - cowlib  (locked: 2.11.0)
+  - decimal  (locked: 2.0.0)
+  - ranch  (locked: 1.8.0)
+  - db_connection  (locked: 2.4.2)
+  - plug  (locked: 1.13.6)
+  - castore  (locked: 0.1.17)
+  - telemetry  (locked: 1.1.0)
+  - mime  (locked: 2.0.2)
   - file_system  (locked: 0.2.10)
   - cowboy_telemetry  (locked: 0.4.0)
+  - cowboy  (locked: 2.9.0)
+  - phoenix_view  (locked: 1.1.2)
+  - ecto  (locked: 3.7.2)
+  - phoenix_pubsub  (locked: 2.1.1)
+  - plug_crypto  (locked: 1.2.2)
 
 Code snippet for mix.exs with exact versions:
 
-      {:castore, "0.1.17"},
+      {:castore, "0.1.13"},
       {:connection, "1.1.0"},
       {:cowboy, "2.9.0"},
       {:cowboy_telemetry, "0.4.0"},
       {:cowlib, "2.11.0"},
-      {:db_connection, "2.4.2"},
+      {:db_connection, "2.4.1"},
       {:decimal, "2.0.0"},
-      {:ecto, "3.7.2"},
+      {:ecto, "3.7.1"},
       {:file_system, "0.2.10"},
       {:html_entities, "0.5.2"},
       {:mime, "2.0.2"},
-      {:phoenix_pubsub, "2.1.1"},
-      {:phoenix_view, "1.1.2"},
-      {:plug, "1.13.6"},
+      {:phoenix_pubsub, "2.0.0"},
+      {:phoenix_view, "1.0.0"},
+      {:plug, "1.12.1"},
       {:plug_crypto, "1.2.2"},
-      {:ranch, "2.1.0"},
-      {:telemetry, "1.1.0"},
+      {:ranch, "1.8.0"},
+      {:telemetry, "1.0.0"},
 
 
 Next steps:
 
-    1. copy-and-past generated code snippet into the deps block in your mix.exs
+    1. copy generated code into the deps block in your mix.exs file
     2. mix deps.clean --all --unlock
     3. mix deps.get
     4. mix compile
@@ -255,23 +240,23 @@ defmodule HelloApp.MixProject do
       {:plug_cowboy, "2.5.2"},
 
       # transitive
-      {:castore, "0.1.17"},
+      {:castore, "0.1.13"},
       {:connection, "1.1.0"},
       {:cowboy, "2.9.0"},
       {:cowboy_telemetry, "0.4.0"},
       {:cowlib, "2.11.0"},
-      {:db_connection, "2.4.2"},
+      {:db_connection, "2.4.1"},
       {:decimal, "2.0.0"},
-      {:ecto, "3.7.2"},
+      {:ecto, "3.7.1"},
       {:file_system, "0.2.10"},
       {:html_entities, "0.5.2"},
       {:mime, "2.0.2"},
-      {:phoenix_pubsub, "2.1.1"},
-      {:phoenix_view, "1.1.2"},
-      {:plug, "1.13.6"},
+      {:phoenix_pubsub, "2.0.0"},
+      {:phoenix_view, "1.0.0"},
+      {:plug, "1.12.1"},
       {:plug_crypto, "1.2.2"},
-      {:ranch, "2.1.0"},
-      {:telemetry, "1.1.0"},
+      {:ranch, "1.8.0"},
+      {:telemetry, "1.0.0"},
     ]
   end
 

@@ -127,6 +127,7 @@ defmodule FixMixLock.UtilsTest do
     assert parse_version("3.0.0-rc.1") == {3, 0, 0}
     assert parse_version("0.0.1") == {0, 0, 1}
     assert parse_version("0.1") == :error
+    assert parse_version("~> 0.2.1 or ~> 0.3") == {0, 2, 1}
   end
 
   test "compare_versions" do
@@ -196,6 +197,38 @@ defmodule FixMixLock.UtilsTest do
     assert deps_list_to_map(deps_list) == %{
              file_system: "0.2.10",
              connection: "1.1.0"
+           }
+  end
+
+  test "get_exact_dep_version" do
+    dep = %Mix.Dep{
+      app: :file_system,
+      requirement: "~> 0.2.1 or ~> 0.3",
+      scm: Hex.SCM,
+      status: {:ok, "0.2.10"}
+    }
+
+    assert get_exact_dep_version(dep) == {:file_system, "0.2.10"}
+  end
+
+  test "get_exact_version" do
+    requirement = "~> 0.2.1 or ~> 0.3"
+    assert get_exact_version(requirement) == "0.2.1"
+  end
+
+  test "get_pkg_point_of_time" do
+    releases = [
+      {"2.0.6", ~U[2024-07-04 10:29:53.986455Z]},
+      {"2.0.2", ~U[2021-10-22 12:42:42.938613Z]},
+      {"2.0.1", ~U[2021-08-15 06:59:42.471906Z]},
+      {"2.0.0", ~U[2021-08-14 07:40:09.768205Z]},
+      {"1.6.0", ~U[2021-03-31 12:25:34.629016Z]},
+      {"1.5.0", ~U[2020-11-24 08:02:24.053553Z]}
+    ]
+
+    assert get_pkg_point_of_time("pkg", "2.0.0", releases) == %{
+             min_time: ~U[2021-08-14 07:40:09.768205Z],
+             max_time: ~U[2021-08-15 06:59:42.471906Z]
            }
   end
 end

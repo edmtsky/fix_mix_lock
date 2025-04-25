@@ -10,29 +10,31 @@ for a specific historical versions.
 It is designed to provide the ability to correct the work of a new generated
 project, which generates a broken `mix.lock` file. For example when you need
 to start a new project with old dependencies, but the project is not compile
-and falls with errors.
+or falls with errors in runtime.
 
 For example, this can be useful when you want to study an old tutorial by
 manually repeating the code from it, and you need to generate a new project
-with a larger number of dependencies. But resolving transitive dependencies
+with a larger number of dependencies. But resolved transitive dependencies
 breaks, and you can't compile the project because it pulls in too recent
 versions of dependencies, whereas you actually need to use the versions that
-were present at the time when the tutorial was written.
+were present at the point of time when the tutorial was written.
 
 Usecase: you would like to go through the Phoenix 1.6 tutorial, and there are
 even specific versions of the main dependencies, but after `mix dps.get`,
 too new transitive dependencies are found in `mix.lock` and the project simply
-does not work, and falling with errors.
+does not work, or fails with errors at runtime.
 
 This tool can helps you to fix this kind of problem and automatically select the
 correct versions of transitive dependencies at a specific historical point in
-time. And this point in time is also determined automatically on the basis of
-specific versions of the packages defined in your `mix.exs` file
+time. And this point in time is also determined automatically by the specific
+version of the first dependency from your `mix.exs` file. That is, by default,
+it's consider that exactly the first dependency specify the historical point
+of time for all other dependencies.
 
 
 ## Features
 
-- Get a historical point in time for defined direct dependencies (via mix.exs)
+- Get a historical point in time by first direct dependency (in mix.exs)
 - Get specific numbers of correct versions for a specific historical period of
   time. That is, the latest dependencies, but for some moment in the past.
   (to fix the issue with broken versions of transitive dependencies)
@@ -53,14 +55,13 @@ specific versions of the packages defined in your `mix.exs` file
 
 - This functionality is implemented as a Task for [Mix](https://hexdocs.pm/elixir/introduction-to-mix.html)
 - Its reads your `mix.exs` file in the current directory and based on the
-  specified versions of the direct dependencies, it takes the maximum date of
-  used packages.
+  specified version of the first dependency, it's determine a historical point
+  of time, which will be used to adjust the versions of other dependencies.
 - Then this task reads the contents of the `mix.lock` file and takes from it
   only transitive dependencies that were not indicated in your `mix.exs` file.
 - And then it turns to the site http://hex.pm in order to get all possible
   versions and dates of their releases for all transitive dependencies and
-  selects only those versions of which the release date is not newer than
-  the latest of the dependencies defined in `mix.exs`.
+  chooses only those versions that are part of a certain point of time.
 
 
 ## Installation
@@ -188,10 +189,9 @@ Fetching releases of the 'plug' package...
 - [+] ability to show all available versions and release date of a given package
 - [+] description of steps how to fully update the dependencies after the fix
 - [-] speed up the work with hex.pm API by sending http-request in parallel
-- [-] build lis of required transitive deps based on direct deps without mix.lock
+- [-] build list of required transitive deps based on direct deps without mix.lock
 - [-] support version range, not only exact version like `{:phoenix, "1.6.16"}`
-- [-] a more smart choice of the version of transitive dependence on with the
-      support of these restrictions by minor, and patch number in version of pkg
-- [-] convert direct dependencies in mix.exs to exact version (remove `~>` prefix)
+- [-] support version restrictions by minor, and patch number on select trans.deps
+- [+] convert direct dependencies in mix.exs to exact version (remove `~>` prefix)
 - [-] a command to search for specific versions for a given packages by a given date
 - [-] integration tests

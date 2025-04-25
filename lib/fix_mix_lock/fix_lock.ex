@@ -52,11 +52,7 @@ defmodule Mix.Tasks.Fix.Lock do
     # list of %Mix.Dep{}
     direct_deps = Mix.Dep.Loader.children()
 
-    direct_deps_map =
-      direct_deps
-      |> Enum.reduce(%{}, fn %Mix.Dep{app: name, requirement: version}, acc ->
-        Map.put(acc, name, version)
-      end)
+    direct_deps_map = deps_list_to_map(direct_deps)
 
     transitive_deps =
       case parse_mix_lock_file("mix.lock") do
@@ -84,14 +80,9 @@ defmodule Mix.Tasks.Fix.Lock do
         Mix.shell().error("Or all your dependencies are already defined in mix.exs")
 
       true ->
-        Mix.shell().info("\nFetching release dates of direct dependencies...")
-        time_range = get_datetime_range(direct_deps)
-
-        Mix.shell().info("\nFetching release dates of transitive dependencies...")
-
         code_snippet =
-          build_fixed_transitive_deps(transitive_deps, time_range)
-          |> readable_fixed_deps()
+          gen_transitive_deps_for_time_point(direct_deps, transitive_deps)
+          |> fixed_deps_map_to_code_snippet()
 
         Mix.shell().info("\nCode snippet for mix.exs with exact versions:\n")
         Mix.shell().info(code_snippet)
@@ -108,4 +99,30 @@ defmodule Mix.Tasks.Fix.Lock do
         """)
     end
   end
+
+  @doc """
+  detect point of time for first direct dependency in the direct_deps list
+  and fix
+  """
+  @spec gen_transitive_deps_for_time_point([Mix.Deps.t()], map()) :: map()
+  defp gen_transitive_deps_for_time_point(direct_deps, transitive_deps) do
+    [main_mix_dep] = Enum.take(direct_deps, 1)
+    # [main_mix_dep, _rest] = direct_deps
+    {mdep_name, mdep_ver} = get_exact_dep_version(main_mix_dep)
+
+    Mix.shell().info("Determine point of time by #{mdep_name} #{mdep_ver} ...")
+    # time_range = get_datetime_range(direct_deps)
+    time_range = fetch_pkg_point_of_time(mdep_name, mdep_ver)
+    %{min_time: t1, max_time: t2} = time_range
+
+    Mix.shell().info("Point of time: #{fmt_date(t1)} - #{fmt_date(t2)}")
+
+    Mix.shell().info("\nFetching release dates of transitive dependencies...")
+    fixed_deps_map = build_fixed_transitive_deps(transitive_deps, time_range)
+
+    # todo fix version for deps of direct_deps (like for ranch "1.8.0")
+
+    fixed_deps_map
+  end
+
 end

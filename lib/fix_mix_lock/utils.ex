@@ -4,6 +4,56 @@ defmodule FixMixLock.Utils do
   """
   alias FixMixLock.HexPmApi
 
+  def fmt_date(dt) do
+    "#{dt.year}/#{dt.month}/#{dt.day}"
+  end
+
+  @doc """
+  get a specific fixed version of dependency (%Mix.Dep{})
+  seems status can contains the exact used version (from mix.lock?)
+  """
+  @spec get_exact_dep_version(Mix.Dep.t()) :: String.t()
+  def get_exact_dep_version(%Mix.Dep{app: name, status: st, requirement: req}) do
+    case st do
+      {:ok, nil} ->
+        {name, get_exact_version(req)}
+
+      {:ok, version} ->
+        {name, version}
+
+      _ ->
+        {name, get_exact_version(req)}
+    end
+  end
+
+  @doc """
+  "~> 1.2.0" to "1.2.0"
+  """
+  @spec get_exact_version(String.t()) :: String.t()
+  def get_exact_version(s) when is_binary(s) do
+    case parse_version(s) do
+      {major, minor, patch} ->
+        "#{major}.#{minor}.#{patch}"
+
+      _ ->
+        "0.0.0"
+    end
+  end
+
+  @doc """
+  Simplifies the list of dependencies received from Mix.Dep.Loader.children()
+  to converting to the Map where the key is the name of the package, and the
+  value is its specific version
+  """
+  @spec deps_list_to_map([Mix.Dep.t()]) :: map()
+  def deps_list_to_map(deps_list) do
+    deps_list
+    |> Enum.reduce(%{}, fn %Mix.Dep{} = dep, acc ->
+      {pkgname, version} = get_exact_dep_version(dep)
+      Map.put(acc, pkgname, version)
+    end)
+  end
+
   # major.minor.patch
   def parse_version(v) do
     case Regex.run(~r/(\d+)\.(\d+)\.(\d+)/, v) do
@@ -42,15 +92,17 @@ defmodule FixMixLock.Utils do
   end
 
   @doc """
+  convert map of deps into code snippet for a mix.exs file
   map of (atom)depname => (string)version
   """
-  @spec readable_fixed_deps(map()) :: String.t()
-  def readable_fixed_deps(deps) do
+  @spec fixed_deps_map_to_code_snippet(map()) :: String.t()
+  def fixed_deps_map_to_code_snippet(deps) do
     deps
     |> Enum.map(fn {name, version} ->
       # todo only: test if parent has only test (e.g. for floki)
       "      {:#{name}, \"#{version}\"},"
     end)
+    |> Enum.sort()
     |> Enum.join("\n")
   end
 
@@ -127,8 +179,10 @@ defmodule FixMixLock.Utils do
   """
   @spec get_datetime_range([Map.Dep.t()]) :: map()
   def get_datetime_range(deps) do
+    init_acc = new_map_for_process_min_max_datetime()
+
     deps
-    |> Enum.reduce(new_map_for_process_min_max_datetime(), fn dep, acc ->
+    |> Enum.reduce(init_acc, fn dep, acc ->
       case dep do
         %Mix.Dep{app: dep_name, requirement: requirement, scm: _scm} ->
           Mix.shell().info("  - #{dep_name}  #{requirement}")
@@ -147,6 +201,38 @@ defmodule FixMixLock.Utils do
 
         _ ->
           acc
+      end
+    end)
+  end
+
+  @doc """
+  """
+  @spec fetch_pkg_point_of_time(String.t(), String.t()) :: String.t()
+  def fetch_pkg_point_of_time(pkg_name, version) do
+    case HexPmApi.fetch_pkg_releases(pkg_name) do
+      {:ok, releases} ->
+        get_pkg_point_of_time(pkg_name, version, releases)
+
+      _ ->
+        :error
+    end
+  end
+
+  def get_pkg_point_of_time(pkg_name, version, releases) do
+    releases
+    |> Enum.reduce(%{}, fn {rel_version, datetime} = release, acc ->
+      cond do
+        rel_version == version ->
+          Map.put(acc, :min_time, datetime)
+
+        true ->
+          case Map.has_key?(acc, :min_time) do
+            true ->
+              acc
+
+            false ->
+              Map.put(acc, :max_time, datetime)
+          end
       end
     end)
   end
