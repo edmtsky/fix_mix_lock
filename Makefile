@@ -3,6 +3,7 @@ init:
 	asdf set elixir 1.12.3-otp-24
 
 build:
+	rm ./fix_mix_lock-*.ez
 	MIX_ENV=prod mix archive.build
 
 install:

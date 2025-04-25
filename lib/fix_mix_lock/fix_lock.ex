@@ -20,14 +20,15 @@ defmodule Mix.Tasks.Fix.Lock do
         defined in this file, it searches for the version no newer(more) than
         the maximum datetime from the mix.exs file.
 
-    Usage: mix my_cli_tool [options]
+    Usage: mix fix.lock [options]
 
     Options:
       -h, --help       Show this help message
       -v, --version    Show the version of the task
-      -p, --package    Show versions and release datetime for a given package
     """
   end
+
+  # -p, --package    Show versions and release datetime for a given package
 
   @impl true
   def run([version]) when version in ~w(-v --version) do
@@ -36,25 +37,6 @@ defmodule Mix.Tasks.Fix.Lock do
 
   def run([help]) when help in ~w(-h --help) do
     Mix.shell().info(help_and_usage())
-  end
-
-  @doc """
-  show all available versions with release datetime of the given package
-  """
-  def run([releases, pkg]) when releases in ~w(-p --package) do
-    pkg_name = String.to_atom(pkg)
-    Mix.shell().info("Fetching releases of the '#{pkg}' package...")
-
-    case HexPmApi.fetch_pkg_releases(pkg_name) do
-      {:ok, releases} ->
-        releases
-        |> Enum.each(fn {version, datetime} ->
-          Mix.shell().info("#{version}        #{datetime}")
-        end)
-
-      err ->
-        IO.inspect(err)
-    end
   end
 
   def run(args) do

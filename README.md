@@ -169,7 +169,7 @@ mix fix.lock --help
 
 get all available versions for a given package
 ```sh
-mix fix.lock --package plug
+mix pkg.vers plug
 ```
 output:
 ```
