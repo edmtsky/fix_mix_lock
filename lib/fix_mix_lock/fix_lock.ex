@@ -1,10 +1,11 @@
 defmodule Mix.Tasks.Fix.Lock do
   use Mix.Task
   alias FixMixLock.HexPmApi
+  import FixMixLock.Utils
 
   @version Mix.Project.config()[:version]
-  @switches [version: :boolean, help: :boolean, releases: :string]
-  @aliases [v: :version, h: :help, r: :releases]
+  @switches [version: :boolean, help: :boolean]
+  @aliases [v: :version, h: :help]
 
   @shortdoc "Fix a mix.lock file based on max datetime from used deps in mix.exs"
 
@@ -105,172 +106,6 @@ defmodule Mix.Tasks.Fix.Lock do
             3. mix deps.get
             4. mix compile
         """)
-    end
-  end
-
-  @doc """
-  map of (atom)depname => (string)version
-  """
-  @spec readable_fixed_deps(map()) :: String.t()
-  def readable_fixed_deps(deps) do
-    deps
-    |> Enum.map(fn {name, version} ->
-      # todo only: test if parent has only test (e.g. for floki)
-      "      {:#{name}, \"#{version}\"},"
-    end)
-    |> Enum.join("\n")
-  end
-
-  @doc """
-  create map with correct versions for a given deps.
-  through sending requests to http://hex.pm and pulling out versions of packages
-  of the releases of which were posted no earlier than the specified max date
-  in time_range
-  """
-  @spec build_fixed_transitive_deps(map(), map()) :: map()
-  def build_fixed_transitive_deps(deps, time_range) do
-    Enum.reduce(deps, %{}, fn {name, old_version}, acc ->
-      Mix.shell().info("  - #{name}  (locked: #{old_version})")
-      %{min_time: min_time, max_time: max_time} = time_range
-
-      case HexPmApi.fetch_pkg_releases(name) do
-        {:ok, releases} ->
-          case select_correct_version(releases, min_time, max_time) do
-            nil ->
-              IO.puts("[WARNING] Cannot get correct version for #{name}")
-              acc
-
-            version ->
-              correct_version =
-                case HexPmApi.compare_versions(old_version, version) do
-                  :lt -> old_version
-                  _ -> version
-                end
-
-              # IO.puts("[DEBUG] '#{name}' correct version: #{version}")
-              Map.put(acc, name, correct_version)
-          end
-
-        _ ->
-          IO.puts("[WARNING] Cannot fetch releases for #{name}")
-          acc
-      end
-    end)
-  end
-
-  @doc """
-  select correct version from given releases (list of {version, datetime)
-  which less than a given max_time
-  """
-  @spec select_correct_version([{atom(), DateTime.t()}], integer(), integer()) :: map()
-  def select_correct_version(releases, _min_time, max_time) do
-    # IO.puts("[DEBUG] min: #{min_time} max: #{max_time}")
-
-    releases
-    |> Enum.find_value(fn {version, datetime} ->
-      if DateTime.compare(datetime, max_time) == :lt do
-        version
-      end
-    end)
-  end
-
-  # determine the datetime range(min/max) datetime used in the specified deps
-  # using access to http://hex.pm
-  # {name, time}
-  @spec get_datetime_range([Map.Dep.t()]) :: map()
-  defp get_datetime_range(deps) do
-    deps
-    |> Enum.reduce(new_map_for_process_min_max_datetime(), fn dep, acc ->
-      case dep do
-        %Mix.Dep{app: dep_name, requirement: requirement, scm: _scm} ->
-          Mix.shell().info("  - #{dep_name}  #{requirement}")
-          # todo remove `~>` if has
-          version = requirement
-
-          case HexPmApi.fetch_pkg_release_version(dep_name, version) do
-            {:ok, pkg_info} ->
-              %{updated_at: updated_at} = pkg_info
-              # IO.inspect(updated_at)
-              process_min_max_datetime(acc, updated_at, dep_name)
-
-            _ ->
-              acc
-          end
-
-        _ ->
-          acc
-      end
-    end)
-  end
-
-  def new_map_for_process_min_max_datetime(now \\ DateTime.now!("Etc/UTC")) do
-    %{
-      max_name: nil,
-      max_time: ~U[1970-01-01 00:00:00.0Z],
-      min_name: nil,
-      min_time: now
-    }
-  end
-
-  @spec process_min_max_datetime(map, DateTime.t(), atom()) :: map()
-  def process_min_max_datetime(map, dt, dep_name) do
-    %{max_time: max_time, min_time: min_time} = map
-
-    case DateTime.compare(dt, max_time) do
-      :gt ->
-        map
-        |> Map.put(:max_name, dep_name)
-        |> Map.put(:max_time, dt)
-
-      _ ->
-        case DateTime.compare(dt, min_time) do
-          :lt ->
-            map
-            |> Map.put(:min_name, dep_name)
-            |> Map.put(:min_time, dt)
-
-          _ ->
-            map
-        end
-    end
-  end
-
-  def parse_mix_lock_line(line) do
-    case Regex.run(~r/\s+"[^"]+":\s+{:hex,\s+:([^"]+),\s+"([^"]+)",/, line) do
-      # case Regex.run(~r/,\s+"(\d+\.\d+\.\d+)",/, line) do
-      [_, name, version] ->
-        # IO.puts("[DEBUG] #{name}  #{version}")
-        {name, version}
-
-      _ ->
-        :error
-    end
-  end
-
-  @doc """
-  parse the content of given mix.lock into Map
-  """
-  @spec parse_mix_lock_file(String.t()) :: map()
-  def parse_mix_lock_file(path) do
-    initial_state = %{}
-
-    case File.read(path) do
-      {:ok, binary} ->
-        binary
-        |> String.split("\n")
-        |> Enum.reduce(initial_state, fn line, acc ->
-          case parse_mix_lock_line(line) do
-            {dep_name, version} ->
-              key = String.to_atom(dep_name)
-              Map.put(acc, key, version)
-
-            :error ->
-              acc
-          end
-        end)
-
-      err ->
-        err
     end
   end
 end

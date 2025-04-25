@@ -49,50 +49,5 @@ defmodule FixMixLock.HexPmApiTest do
                {"0.0.1", ~U[2015-10-26 10:42:12.216908Z]}
              ]
     end
-
-    test "parse_version" do
-      assert parse_version("1.2.3") == {1, 2, 3}
-      assert parse_version("3.0.0-rc.1") == {3, 0, 0}
-      assert parse_version("0.0.1") == {0, 0, 1}
-      assert parse_version("0.1") == :error
-    end
-
-    test "compare_versions" do
-      assert compare_versions("0.0.0", "0.0.0") == :eq
-      assert compare_versions("0.1.0", "0.1.0") == :eq
-      assert compare_versions("1.0.0", "1.0.0") == :eq
-      assert compare_versions("1.2.3", "1.2.3") == :eq
-      # ignore suffix
-      assert compare_versions("1.2.3", "1.2.3-rc.1") == :eq
-
-      assert compare_versions("0.0.1", "0.0.0") == :gt
-      assert compare_versions("0.1.0", "0.0.0") == :gt
-      assert compare_versions("1.0.0", "0.0.0") == :gt
-
-      assert compare_versions("0.0.2", "0.0.1") == :gt
-      assert compare_versions("0.1.0", "0.0.2") == :gt
-      assert compare_versions("1.0.0", "0.9.0") == :gt
-
-      assert compare_versions("0.0.0", "0.0.1") == :lt
-      assert compare_versions("0.0.9", "0.1.0") == :lt
-      assert compare_versions("0.9.9", "1.0.0") == :lt
-      assert compare_versions("1.8.9", "1.9.0") == :lt
-      assert compare_versions("8.8.9", "8.9.6") == :lt
-
-      assert compare_versions("bad", "8.9.6") == :error
-      assert compare_versions("0.0.0", "bad") == :error
-      assert compare_versions("abc", "abc") == :error
-    end
-
-    # test "fetch_pkg_info" do
-    #   time_range = %{ # hardcoded values for fast debuggin
-    #     max_name: :swoosh,
-    #     max_time: ~U[2022-05-31 07:39:56.141016Z],
-    #     min_name: :telemetry_metrics,
-    #     min_time: ~U[2021-07-03 20:47:06.488206Z]
-    #   }
-    #   info = fetch_pkg_info(:plug)
-    #   assert info = 1
-    # end
   end
 end

@@ -3,8 +3,8 @@ defmodule Mix.Tasks.Pkg.Vers do
   alias FixMixLock.HexPmApi
 
   @version Mix.Project.config()[:version]
-  @switches [version: :boolean, help: :boolean, releases: :string]
-  @aliases [v: :version, h: :help, r: :releases]
+  @switches [version: :boolean, help: :boolean]
+  @aliases [v: :version, h: :help]
 
   @shortdoc "Show versions of the given package and the dates of releases"
 

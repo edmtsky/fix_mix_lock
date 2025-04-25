@@ -107,41 +107,4 @@ defmodule FixMixLock.HexPmApi do
         nil
     end
   end
-
-  # major.minor.patch
-  def parse_version(v) do
-    case Regex.run(~r/(\d+)\.(\d+)\.(\d+)/, v) do
-      [_, major, minor, patch] ->
-        {String.to_integer(major), String.to_integer(minor), String.to_integer(patch)}
-
-      _ ->
-        :error
-    end
-  end
-
-  def compare_versions(v1, v2) when is_binary(v1) and is_binary(v2) do
-    a = parse_version(v1)
-    b = parse_version(v2)
-
-    case {a, b} do
-      {{ma1, mi1, p1}, {ma2, mi2, p2}} ->
-        cond do
-          ma1 == ma2 && mi1 == mi2 && p1 == p2 ->
-            :eq
-
-          ma1 > ma2 || (ma1 == ma2 && (mi1 > mi2 || (mi1 == mi2 && p1 > p2))) ->
-            :gt
-
-          true ->
-            :lt
-        end
-
-      _ ->
-        :error
-    end
-  end
-
-  def compare_versions(_, _) do
-    :error
-  end
 end

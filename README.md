@@ -194,3 +194,4 @@ Fetching releases of the 'plug' package...
       support of these restrictions by minor, and patch number in version of pkg
 - [-] convert direct dependencies in mix.exs to exact version (remove `~>` prefix)
 - [-] a command to search for specific versions for a given packages by a given date
+- [-] integration tests
